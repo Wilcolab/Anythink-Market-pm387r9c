@@ -32,7 +32,7 @@ func healthcheck(c *gin.Context) {
 
 func getItems(c *gin.Context){
 	items := []Item{
-		{ID: 1, NAME: "Galactic Goggles"},
+		{ID: 1, Name: "Galactic Goggles"},
 		{ID: 2, Name: "Meteor Muffins"},
 		{ID: 3, Name: "Alien Antenna Kit"},
         {ID: 4, Name: "Starlight Lantern"},
