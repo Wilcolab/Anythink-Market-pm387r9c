@@ -6,15 +6,15 @@ import (
 )
 
 type Item struct{
-	ID int = 'json:"id"'
-	NAME string = 'json:"name"'
+	ID int  `json:"id"`
+	NAME string  `json:"name"`
 }
 
 func main() {
 	router := gin.Default()
 	router.GET("/", greet)
 	router.HEAD("/healthcheck", healthcheck)
-	router.GET("/items", getItems)
+	router.GET("/items", getItems) //Added this line
 
 	router.Run()
 }
