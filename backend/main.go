@@ -29,9 +29,9 @@ func main() {
 	router.GET("/", greet)
 	router.HEAD("/healthcheck", healthcheck)
 	router.GET("/items", getItems)
-	router.POST("/items", addItem)
-	router.GET("/items/:id", getItem)
-	router.GET("/items/popular", getPopularItem)
+	router.POST("/items", addItem) // Added line 1
+	router.GET("/items/:id", getItem) // Added line 2
+	router.GET("/items/popular", getPopularItem) // Added line 3
 
 	router.Run()
 }
