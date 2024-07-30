@@ -4,21 +4,25 @@ import (
 	"net/http"
 	"strconv"
 	"sync"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 type Item struct {
-	ID        int    `json:"id"`
-	Name      string `json:"name"`
-	ViewCount int    `json:"viewCount"`
+	ID    int    `json:"id"`
+	Name  string `json:"name"`
+	Views int    `json:"views"`
 }
 
 var (
-	items     []Item
-	idCounter int
-	mutex     sync.Mutex
+	items = []Item{
+		{ID: 1, Name: "Galactic Goggles", Views: 0},
+		{ID: 2, Name: "Meteor Muffins", Views: 0},
+		{ID: 3, Name: "Alien Antenna Kit", Views: 0},
+		{ID: 4, Name: "Starlight Lantern", Views: 0},
+		{ID: 5, Name: "Quantum Quill", Views: 0},
+	}
+	itemsLock sync.Mutex
 )
 
 func main() {
@@ -27,16 +31,8 @@ func main() {
 	router.HEAD("/healthcheck", healthcheck)
 	router.GET("/items", getItems)
 	router.POST("/items", addItem)
-	router.GET("/items/:id", getItemByID) 
-
-	items = []Item{
-		{ID: 1, Name: "Galactic Goggles", ViewCount: 0},
-		{ID: 2, Name: "Meteor Muffins", ViewCount: 0},
-		{ID: 3, Name: "Alien Antenna Kit", ViewCount: 0},
-		{ID: 4, Name: "Starlight Lantern", ViewCount: 0},
-		{ID: 5, Name: "Quantum Quill", ViewCount: 0},
-	}
-	idCounter = 6
+	router.GET("/items/:id", getItem)
+	router.GET("/items/popular", getPopularItem)
 
 	router.Run()
 }
@@ -52,58 +48,58 @@ func healthcheck(c *gin.Context) {
 }
 
 func getItems(c *gin.Context) {
+	itemsLock.Lock()
+	defer itemsLock.Unlock()
 	c.JSON(http.StatusOK, items)
 }
 
 func addItem(c *gin.Context) {
 	var newItem Item
-
 	if err := c.BindJSON(&newItem); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	mutex.Lock()
-	defer mutex.Unlock()
-
-	newItem.ID = idCounter
-	newItem.ViewCount = 0
-	idCounter++
+	itemsLock.Lock()
+	newItem.ID = len(items) + 1
 	items = append(items, newItem)
-
+	itemsLock.Unlock()
 	c.JSON(http.StatusOK, newItem)
 }
 
-func getItemByID(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
+func getItem(c *gin.Context) {
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid item ID"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid item ID"})
 		return
 	}
 
-	var item *Item
-
-	for i := range items {
-		if items[i].ID == id {
-			item = &items[i]
-			break
+	itemsLock.Lock()
+	defer itemsLock.Unlock()
+	for i, item := range items {
+		if item.ID == id {
+			items[i].Views++
+			c.JSON(http.StatusOK, items[i])
+			return
 		}
 	}
+	c.JSON(http.StatusNotFound, gin.H{"message": "Item not found"})
+}
 
-	if item == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Item not found"})
+func getPopularItem(c *gin.Context) {
+	itemsLock.Lock()
+	defer itemsLock.Unlock()
+
+	if len(items) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"message": "No items found"})
 		return
 	}
 
-	go incrementViewCount(item)
-
-	c.JSON(http.StatusOK, item)
-}
-
-func incrementViewCount(item *Item) {
-	mutex.Lock()
-	defer mutex.Unlock()
-
-	item.ViewCount++
-	time.Sleep(100 * time.Millisecond) 
+	mostViewed := items[0]
+	for _, item := range items {
+		if item.Views > mostViewed.Views {
+			mostViewed = item
+		}
+	}
+	c.JSON(http.StatusOK, mostViewed)
 }
