@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"strconv"
 	"sync"
 
 	"github.com/gin-gonic/gin"
@@ -29,9 +30,9 @@ func main() {
 	router.GET("/", greet)
 	router.HEAD("/healthcheck", healthcheck)
 	router.GET("/items", getItems)
-	router.POST("/items", addItem) // Added line 1
-	router.GET("/items/:id", getItem) // Added line 2
-	router.GET("/items/popular", getPopularItem) // Added line 3
+	router.POST("/items", addItem)
+	router.GET("/items/:id", getItem)
+	router.GET("/items/popular", getPopularItem)
 
 	router.Run()
 }
@@ -66,7 +67,13 @@ func addItem(c *gin.Context) {
 }
 
 func getItem(c *gin.Context) {
-	id := c.Param("id")
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid item ID"})
+		return
+	}
+
 	itemsLock.Lock()
 	defer itemsLock.Unlock()
 	for i, item := range items {
