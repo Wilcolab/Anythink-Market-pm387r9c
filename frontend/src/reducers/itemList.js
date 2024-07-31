@@ -77,6 +77,15 @@ const reducer = (state = {}, action) => {
         itemsCount: action.payload?.[1]?.itemsCount,
         currentPage: 0,
       };
+    case APPLY_SEARCH:
+       return {
+        ...state,
+        items: action.payload.items,
+        itemsCount: action.payload.itemsCount,
+        pager: action.pager,
+        currentPage: 0
+  };
+
     case PROFILE_PAGE_UNLOADED:
     case PROFILE_FAVORITES_PAGE_UNLOADED:
       return {};

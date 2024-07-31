@@ -8,6 +8,7 @@ import {
   HOME_PAGE_LOADED,
   HOME_PAGE_UNLOADED,
   APPLY_TAG_FILTER,
+  APPLY_SEARCH
 } from "../../constants/actionTypes";
 
 const Promise = global.Promise;
@@ -24,9 +25,10 @@ const mapDispatchToProps = (dispatch) => ({
   onLoad: (tab, pager, payload) =>
     dispatch({ type: HOME_PAGE_LOADED, tab, pager, payload }),
   onUnload: () => dispatch({ type: HOME_PAGE_UNLOADED }),
+  onSearch: (payload) => dispatch({ type: APPLY_SEARCH, payload }),
 });
 
-const Home = ({onLoad, onUnload, tags, onClickTag}) => {
+const Home = ({onLoad, onUnload, tags, onClickTag, onSearch}) => {
   const tab = "all";
   const itemsPromise = agent.Items.all;
 
@@ -39,16 +41,29 @@ const Home = ({onLoad, onUnload, tags, onClickTag}) => {
     return onUnload;
   }, [onLoad, onUnload, tab, itemsPromise]);
 
-    return (
-      <div className="home-page">
-        <Banner />
+  const handleSearch = async (searchTerm) => {
+    if (searchTerm.length >= 3) {
+      const result = await agent.Items.search(searchTerm);
+      onSearch(result);
+    } else {
+      onLoad(
+        tab,
+        itemsPromise,
+        Promise.all([agent.Tags.getAll(), itemsPromise()])
+      );
+    }
+  };
 
-        <div className="container page">
-          <Tags tags={tags} onClickTag={onClickTag} />
-          <MainView />
-        </div>
+  return (
+    <div className="home-page">
+      <Banner />
+
+      <div className="container page">
+        <Tags tags={tags} onClickTag={onClickTag} />
+        <MainView onSearch={handleSearch} />
       </div>
-    );
+    </div>
+  );
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Home);
