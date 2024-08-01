@@ -8,6 +8,7 @@ import {
   HOME_PAGE_LOADED,
   HOME_PAGE_UNLOADED,
   APPLY_TAG_FILTER,
+  APPLY_SEARCH
 } from "../../constants/actionTypes";
 
 const Promise = global.Promise;
@@ -24,9 +25,11 @@ const mapDispatchToProps = (dispatch) => ({
   onLoad: (tab, pager, payload) =>
     dispatch({ type: HOME_PAGE_LOADED, tab, pager, payload }),
   onUnload: () => dispatch({ type: HOME_PAGE_UNLOADED }),
+  onSearch: (title, pager, payload) => 
+    dispatch({ type: APPLY_SEARCH, title, pager,payload }),
 });
 
-const Home = ({onLoad, onUnload, tags, onClickTag}) => {
+const Home = ({onLoad, onUnload, tags, onClickTag, onSearch}) => {
   const tab = "all";
   const itemsPromise = agent.Items.all;
 
@@ -39,16 +42,18 @@ const Home = ({onLoad, onUnload, tags, onClickTag}) => {
     return onUnload;
   }, [onLoad, onUnload, tab, itemsPromise]);
 
-    return (
-      <div className="home-page">
-        <Banner />
 
-        <div className="container page">
-          <Tags tags={tags} onClickTag={onClickTag} />
-          <MainView />
-        </div>
+
+  return (
+    <div className="home-page">
+      <Banner onSearchFilter={onSearch}/>
+
+      <div className="container page">
+        <Tags tags={tags} onClickTag={onClickTag} />
+        <MainView/>
       </div>
-    );
+    </div>
+  );
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Home);
