@@ -86,7 +86,8 @@ const reducer = (state = {}, action) => {
         itemsCount: action.payload.itemsCount,
         tab: null,
         title: action.title,
-        currentPage: 0
+        currentPage: 0,
+        noResults: action.payload.items.length === 0,
   };
 
     case PROFILE_PAGE_UNLOADED:

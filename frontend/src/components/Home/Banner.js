@@ -4,6 +4,9 @@ import agent from "../../agent";
 
 const Banner = (props) => {
   const onSearchChange = async (event) =>{
+    
+    event.preventDefault();
+
     props.onSearchFilter(
       event.target.value,
       (page) => 
