@@ -3,6 +3,7 @@ import {
   ITEM_UNFAVORITED,
   SET_PAGE,
   APPLY_TAG_FILTER,
+  APPLY_SEARCH,
   HOME_PAGE_LOADED,
   HOME_PAGE_UNLOADED,
   CHANGE_TAB,
@@ -79,10 +80,12 @@ const reducer = (state = {}, action) => {
       };
     case APPLY_SEARCH:
        return {
-        ...state,
+         ...state,
+        pager: action.pager,
         items: action.payload.items,
         itemsCount: action.payload.itemsCount,
-        pager: action.pager,
+        tab: null,
+        title: action.title,
         currentPage: 0
   };
 

@@ -1,8 +1,8 @@
 import ItemList from "../ItemList";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import agent from "../../agent";
 import { connect } from "react-redux";
-import { CHANGE_TAB, APPLY_SEARCH } from "../../constants/actionTypes";
+import { CHANGE_TAB } from "../../constants/actionTypes";
 
 const YourFeedTab = (props) => {
   if (props.token) {
@@ -67,29 +67,9 @@ const mapStateToProps = (state) => ({
 const mapDispatchToProps = (dispatch) => ({
   onTabClick: (tab, pager, payload) =>
     dispatch({ type: CHANGE_TAB, tab, pager, payload }),
-  onSearch: (payload) => dispatch({ type: APPLY_SEARCH, payload }),
 });
 
 const MainView = (props) => {
-  const [searchTerm, setSearchTerm] = useState("");
-
-  useEffect(() => {
-    if (searchTerm.length >= 3) {
-      const searchItems = async () => {
-        const result = await agent.Items.search(searchTerm);
-        props.onSearch(result);
-      };
-      searchItems();
-    } else if (searchTerm === "") {
-      props.onTabClick(props.tab, agent.Items.all, agent.Items.all());
-    }
-  }, [searchTerm]);
-
-  const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
-    props.onSearch(e.target.value);
-  };
-
   return (
     <div>
       <div className="feed-toggle">
@@ -104,16 +84,6 @@ const MainView = (props) => {
 
           <TagFilterTab tag={props.tag} />
         </ul>
-      </div>
-
-      <div className="search-box">
-        <input
-          type="text"
-          id="search-box"
-          placeholder="Search for items..."
-          value={searchTerm}
-          onChange={handleSearchChange}
-        />
       </div>
 
       <ItemList

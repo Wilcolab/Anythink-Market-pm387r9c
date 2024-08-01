@@ -25,7 +25,8 @@ const mapDispatchToProps = (dispatch) => ({
   onLoad: (tab, pager, payload) =>
     dispatch({ type: HOME_PAGE_LOADED, tab, pager, payload }),
   onUnload: () => dispatch({ type: HOME_PAGE_UNLOADED }),
-  onSearch: (payload) => dispatch({ type: APPLY_SEARCH, payload }),
+  onSearch: (title, pager, payload) => 
+    dispatch({ type: APPLY_SEARCH, title, pager,payload }),
 });
 
 const Home = ({onLoad, onUnload, tags, onClickTag, onSearch}) => {
@@ -41,26 +42,15 @@ const Home = ({onLoad, onUnload, tags, onClickTag, onSearch}) => {
     return onUnload;
   }, [onLoad, onUnload, tab, itemsPromise]);
 
-  const handleSearch = async (searchTerm) => {
-    if (searchTerm.length >= 3) {
-      const result = await agent.Items.search(searchTerm);
-      onSearch(result);
-    } else {
-      onLoad(
-        tab,
-        itemsPromise,
-        Promise.all([agent.Tags.getAll(), itemsPromise()])
-      );
-    }
-  };
+
 
   return (
     <div className="home-page">
-      <Banner />
+      <Banner onSearchFilter={onSearch}/>
 
       <div className="container page">
         <Tags tags={tags} onClickTag={onClickTag} />
-        <MainView onSearch={handleSearch} />
+        <MainView/>
       </div>
     </div>
   );
