@@ -52,7 +52,6 @@ const Tags = {
 
 const limit = (count, p) => `limit=${count}&offset=${p ? p * count : 0}`;
 const omitSlug = (item) => Object.assign({}, item, { slug: undefined });
-
 const Items = {
   all: (page) => requests.get(`/items?${limit(1000, page)}`),
   bySeller: (seller, page) =>
@@ -68,10 +67,7 @@ const Items = {
   unfavorite: (slug) => requests.del(`/items/${slug}/favorite`),
   update: (item) =>
     requests.put(`/items/${item.slug}`, { item: omitSlug(item) }),
-  create: (item) => 
-    requests.post("/items", { item }),
-  byTitle: (title, page) => 
-    requests.get(`/items?title=${encode(title)}&${limit(1000, page)}`),
+  create: (item) => requests.post("/items", { item }),
 };
 
 const Comments = {
